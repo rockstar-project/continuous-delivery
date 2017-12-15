@@ -1,0 +1,17 @@
+sudo: required
+
+language: java
+
+jdk:
+  - oraclejdk8
+
+services:
+  - docker
+
+script:
+  - mvn clean package
+
+after_success:
+  - docker build -t {{docker.namespace}}/{{docker.repo}}:{{docker.tag}} .
+  - docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+  - docker push {{docker.namespace}}/{{docker.repo}}:{{docker.tag}}

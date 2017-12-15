@@ -1,0 +1,102 @@
+artifactapi:
+  environment:
+    - 'SECURITY_OAUTH2_RESOURCE_USER_INFO_URI=https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/userinfo'
+    - SPRING_PROFILES_ACTIVE=docker
+  image: 'kicksterproject/coreapi-artifact:latest'
+  links:
+    - discovery
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+contentapi:
+  environment:
+    - 'SECURITY_OAUTH2_RESOURCE_USER_INFO_URI=https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/userinfo'
+    - SPRING_DATASOURCE_PASSWORD=gravitant123
+    - 'SPRING_DATASOURCE_URL=jdbc:mysql://contentmysql:3306/kickster_db_content'
+    - SPRING_DATASOURCE_USERNAME=gravitant
+    - SPRING_PROFILES_ACTIVE=docker
+  image: 'kicksterproject/coreapi-content:latest'
+  links:
+    - contentmysql
+    - discovery
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+contentmysql:
+  environment:
+    - MYSQL_DATABASE=kickster_db_content
+    - MYSQL_PASSWORD=gravitant123
+    - MYSQL_ROOT_PASSWORD=gravitant123
+    - MYSQL_USER=gravitant
+  image: 'mysql:latest'
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+discovery:
+  image: 'kicksterproject/discovery-service:latest'
+  ports:
+    - '8761:8761'
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+gateway:
+  environment:
+    - SPRING_PROFILES_ACTIVE=docker
+  image: 'kicksterproject/api-gateway:latest'
+  links:
+    - discovery
+  ports:
+    - '80:8765'
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+modelapi:
+  environment:
+    - 'SECURITY_OAUTH2_RESOURCE_USER_INFO_URI=https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/userinfo'
+    - SPRING_DATASOURCE_PASSWORD=gravitant123
+    - 'SPRING_DATASOURCE_URL=jdbc:mysql://modelmysql:3306/kickster_db_model'
+    - SPRING_DATASOURCE_USERNAME=gravitant
+    - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+    - SPRING_JPA_SHOW_SQL=true
+    - SPRING_PROFILES_ACTIVE=docker
+  image: 'kicksterproject/coreapi-model:latest'
+  links:
+    - discovery
+    - modelmysql
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+modelmysql:
+  environment:
+    - MYSQL_DATABASE=kickster_db_model
+    - MYSQL_PASSWORD=gravitant123
+    - MYSQL_ROOT_PASSWORD=gravitant123
+    - MYSQL_USER=gravitant
+  image: 'mysql:latest'
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+templateapi:
+  environment:
+    - 'SECURITY_OAUTH2_RESOURCE_USER_INFO_URI=https://prepiam.toronto.ca.ibm.com/idaas/oidc/endpoint/default/userinfo'
+    - SPRING_DATASOURCE_PASSWORD=gravitant123
+    - 'SPRING_DATASOURCE_URL=jdbc:mysql://templatemysql:3306/kickster_db_template'
+    - SPRING_DATASOURCE_USERNAME=gravitant
+    - SPRING_PROFILES_ACTIVE=docker
+  image: 'kicksterproject/coreapi-template:latest'
+  links:
+    - discovery
+    - templatemysql
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo
+templatemysql:
+  environment:
+    - MYSQL_DATABASE=kickster_db_template
+    - MYSQL_PASSWORD=gravitant123
+    - MYSQL_ROOT_PASSWORD=gravitant123
+    - MYSQL_USER=gravitant
+  image: 'mysql:latest'
+  restart: always
+  tags:
+    - nodecluster-name=kickster-demo

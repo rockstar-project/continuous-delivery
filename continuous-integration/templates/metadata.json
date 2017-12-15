@@ -1,0 +1,28 @@
+{
+  "application": {
+    "name": "kickster",
+    "version": "1.0.0-SNAPSHOT",
+    "team": "IBM Cloud Data Protect Team",
+    "settings": {
+      "project_dir": "workspace-kickster",
+      "base_path": "Downloads"
+    },
+    "services": [
+      {
+        "name": "model",
+        "type": "coreapi",
+        "version": "1.0.0-SNAPSHOT",
+        "datastore": "mysql",
+        "github": {
+          "org": "kickster",
+          "repo": "coreapi-model"
+        },
+        "docker": {
+          "namespace": "kickster",
+          "repo": "coreapi-model",
+          "tag": "1.0.0-SNAPSHOT"
+        }
+      }
+    ]
+  }
+}

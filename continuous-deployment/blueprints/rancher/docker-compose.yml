@@ -1,0 +1,135 @@
+version: '2'
+
+services:
+  memberapi:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/coreapi-member
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_USERNAME=kickster
+      - SPRING_DATASOURCE_PASSWORD=kickster123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://membermysql:3306/kickster_db_member'
+    links:
+      - discovery
+      - membermysql
+  membermysql:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/datastore-member
+    volumes:
+      - /data
+    environment:
+      - MYSQL_DATABASE=kickster_db_member
+      - MYSQL_USER=kickster
+      - MYSQL_PASSWORD=kickster123
+      - MYSQL_ROOT_PASSWORD=kickster123
+  contentapi:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/coreapi-content
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_USERNAME=kickster
+      - SPRING_DATASOURCE_PASSWORD=kickster123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://contentmysql:3306/kickster_db_content'
+    links:
+      - discovery
+      - contentmysql
+  contentmysql:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/datastore-content
+    volumes:
+      - /data
+    environment:
+      - MYSQL_DATABASE=kickster_db_content
+      - MYSQL_USER=kickster
+      - MYSQL_PASSWORD=kickster123
+      - MYSQL_ROOT_PASSWORD=kickster123
+  modelapi:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/coreapi-model
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_USERNAME=kickster
+      - SPRING_DATASOURCE_PASSWORD=kickster123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://modelmysql/kickster_db_model'
+    links:
+      - discovery
+      - modelmysql
+  modelmysql:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/datastore-model
+    volumes:
+      - /data
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_DATABASE=kickster_db_model
+      - MYSQL_USER=kickster
+      - MYSQL_PASSWORD=kickster123
+      - MYSQL_ROOT_PASSWORD=kickster123
+  templateapi:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/coreapi-template
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_USERNAME=kickster
+      - SPRING_DATASOURCE_PASSWORD=kickster123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://templatemysql/kickster_db_template'
+    links:
+      - discovery
+      - templatemysql
+  templatemysql:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/datastore-template
+    volumes:
+      - /data
+    ports:
+      - 3308:3306
+    environment:
+      - MYSQL_DATABASE=kickster_db_template
+      - MYSQL_USER=kickster
+      - MYSQL_PASSWORD=kickster123
+      - MYSQL_ROOT_PASSWORD=kickster123
+  gateway:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/api-gateway
+    ports:
+      - 80:8765
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    links:
+      - discovery
+  discovery:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/discovery-service
+    ports:
+      - 8761:8761
+  artifactapi:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/coreapi-artifact
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_USERNAME=kickster
+      - SPRING_DATASOURCE_PASSWORD=kickster123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://artifactmysql:3306/kickster_db_artifact'
+      - SPRING_RABBITMQ_HOST=messaging
+    links:
+      - discovery
+      - messaging
+      - artifactmysql
+  artifactmysql:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/datastore-artifact
+    volumes:
+      - /data
+    environment:
+      - MYSQL_DATABASE=kickster_db_artifact
+      - MYSQL_USER=kickster
+      - MYSQL_PASSWORD=kickster123
+      - MYSQL_ROOT_PASSWORD=kickster123
+  messaging:
+    image: rabbitmq:3.5.3
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  schemaapi:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/coreapi-schema
+    environment:
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SPRING_DATA_MONGODB_URI=mongodb://schemamongo:27017/kickster_db_schema"
+    links:
+      - discovery
+      - schemamongo
+  schemamongo:
+    image: developerexp-kickster-docker-local.artifactory.swg-devops.com/kickster/datastore-schema
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data
