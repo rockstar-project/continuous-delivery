@@ -1,38 +1,64 @@
-version: '2'
+version: '3'
 
 services:
-  templateapi:
-    image: kickster/coreapi-template
+  metadataapi:
+    image: rockstarproject/coreapi-metadata
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_USERNAME=kickster
-      - SPRING_DATASOURCE_PASSWORD=kickster123
-      - 'SPRING_DATASOURCE_URL=jdbc:mysql://templatemysql/kickster_db_template'
+      - AUTH0_ISSUER=https://rockstar.auth0.com/
+      - AUTH0_AUDIENCE=https://api.rock-star.io/metadata
+      - "SPRING_DATA_MONGODB_URI=mongodb://metadatamongo:27017/rockstar_db_metadata"
     links:
       - discovery
-      - templatemysql
-  templatemysql:
-    image: kickster/datastore-template
+      - metadatamongo
+  metadataseed:
+    image: rockstarproject/datastore-metadata
+    links:
+      - metadatamongo
+    command:
+      "mongoimport --host metadatamongo --db rockstar_db_metadata --collection metadata --type json --file metadata.json --jsonArray"
+  metadatamongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - /data
+  productapi:
+    image: rockstarproject/coreapi-product
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AUTH0_ISSUER=https://rockstar.auth0.com/
+      - AUTH0_AUDIENCE=http://api.rock-star.io/v1
+      - SPRING_DATASOURCE_USERNAME=rockstar
+      - SPRING_DATASOURCE_PASSWORD=rockstar123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://productmysql/rockstar_db_product'
+    links:
+      - discovery
+      - productmysql
+  productmysql:
+    image: rockstarproject/datastore-product
     volumes:
       - /data
     ports:
       - 3308:3306
     environment:
-      - MYSQL_DATABASE=kickster_db_template
-      - MYSQL_USER=kickster
-      - MYSQL_PASSWORD=kickster123
-      - MYSQL_ROOT_PASSWORD=kickster123
+      - MYSQL_DATABASE=rockstar_db_product
+      - MYSQL_USER=rockstar
+      - MYSQL_PASSWORD=rockstar123
+      - MYSQL_ROOT_PASSWORD=rockstar123
   artifactapi:
-    image: kickster/coreapi-artifact
+    image: rockstarproject/coreapi-artifact
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_USERNAME=kickster
-      - SPRING_DATASOURCE_PASSWORD=kickster123
-      - 'SPRING_DATASOURCE_URL=jdbc:mysql://artifactmysql:3306/kickster_db_artifact'
+      - AUTH0_ISSUER=https://rockstar.auth0.com/
+      - AUTH0_AUDIENCE=http://api.rock-star.io/v1
+      - SPRING_DATASOURCE_USERNAME=rockstar
+      - SPRING_DATASOURCE_PASSWORD=rockstar123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://artifactmysql:3306/rockstar_db_artifact'
     links:
       - discovery
   gateway:
-    image: kickster/api-gateway
+    image: rockstarproject/api-gateway
     ports:
       - 80:8765
     environment:
@@ -40,6 +66,6 @@ services:
     links:
       - discovery
   discovery:
-    image: kickster/discovery-service
+    image: rockstarproject/discovery-service
     ports:
       - 8761:8761
