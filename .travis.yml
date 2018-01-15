@@ -16,4 +16,4 @@ before_install: curl -L https://github.com/docker/machine/releases/download/v0.1
                 chmod +x /tmp/docker-machine &&
                 sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
 
-script: ./continous-deployment/dockercloud/swarm-deploy.sh
+script: ./continous-deployment/deploy/dockercloud/swarm-deploy.sh
