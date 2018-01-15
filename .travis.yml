@@ -1,0 +1,19 @@
+language: generic
+
+sudo: required
+services:
+  - docker
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    - salsiddiqui0@gmail.com
+
+before_install: curl -L https://github.com/docker/machine/releases/download/v0.12.2/docker-machine-`uname -s`-`uname -m` >/tmp/docker-machine &&
+                chmod +x /tmp/docker-machine &&
+                sudo cp /tmp/docker-machine /usr/local/bin/docker-machine
+
+script: ./continous-deployment/dockercloud/swarm-deploy.sh
