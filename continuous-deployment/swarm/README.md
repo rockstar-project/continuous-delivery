@@ -1,4 +1,13 @@
-# Swarm Deployment on virtualbox
+# Deploy Swarm Cluster on Virtual Box
 
-./vb/setup-swarm.sh apistaging
-./vb/deploy-stack.sh apistaging
+```
+./vb/setup.sh apistaging
+./deploy.sh apistaging
+```
+
+# Deploy Swarm Cluster on AWS cloud
+
+```
+./aws/setup.sh apistaging
+./deploy.sh apistaging
+```
