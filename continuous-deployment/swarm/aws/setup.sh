@@ -46,4 +46,6 @@ docker swarm join --token $TOKEN ${SWARM_MANAGER_INTERNAL_IP}:${SWARM_PORT}
 # verify the cluster
 
 eval $(docker-machine env ${STACK_NAME}-swarm-manager)
+docker node update --label-add type=gateway ${STACK_NAME}-swarm-manager
+
 docker node ls
