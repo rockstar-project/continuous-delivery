@@ -11,3 +11,9 @@ git clone https://github.com/rockstar-project/coreapi-product.git
 git clone https://github.com/rockstar-project/coreapi-artifact.git
 git clone https://github.com/rockstar-project/datastore-metadata.git
 git clone https://github.com/rockstar-project/datastore-product.git
+
+docker-compose pull discovery
+docker-compose pull gateway
+docker-compose pull productmyapi
+docker-compose pull metadataapi
+docker-compose pull artifactapi

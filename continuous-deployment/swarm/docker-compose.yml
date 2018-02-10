@@ -6,19 +6,19 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - AUTH0_ISSUER=https://rockstar.auth0.com/
-      - AUTH0_AUDIENCE=http://api.rock-star.io/v1
+      - AUTH0_AUDIENCE=https://api.rock-star.io/
       - "SPRING_DATA_MONGODB_URI=mongodb://metadatamongo:27017/rockstar_db_metadata"
-    links:
+    depends_on:
       - discovery
       - metadatamongo
   metadataseed:
     image: rockstarproject/datastore-metadata
-    links:
+    depends_on:
       - metadatamongo
     command:
       "mongoimport --host metadatamongo --db rockstar_db_metadata --collection metadata --type json --file metadata.json --jsonArray"
   metadatamongo:
-    image: mongo
+    image: rockstarproject/datastore-metadata
     ports:
       - "27017:27017"
     volumes:
@@ -28,11 +28,11 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - AUTH0_ISSUER=https://rockstar.auth0.com/
-      - AUTH0_AUDIENCE=http://api.rock-star.io/v1
+      - AUTH0_AUDIENCE=https://api.rock-star.io/
       - SPRING_DATASOURCE_USERNAME=rockstar
       - SPRING_DATASOURCE_PASSWORD=rockstar123
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://productmysql/rockstar_db_product'
-    links:
+    depends_on:
       - discovery
       - productmysql
   productmysql:
@@ -46,16 +46,36 @@ services:
       - MYSQL_USER=rockstar
       - MYSQL_PASSWORD=rockstar123
       - MYSQL_ROOT_PASSWORD=rockstar123
+  collectionapi:
+    image: rockstarproject/coreapi-collection
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - AUTH0_ISSUER=https://rockstar.auth0.com/
+      - AUTH0_AUDIENCE=https://api.rock-star.io/
+      - SPRING_DATASOURCE_USERNAME=rockstar
+      - SPRING_DATASOURCE_PASSWORD=rockstar123
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://collectionmysql/rockstar_db_collection'
+    depends_on:
+      - discovery
+      - collectionmysql
+  collectionmysql:
+    image: rockstarproject/datastore-collection
+    volumes:
+      - /data
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_DATABASE=rockstar_db_collection
+      - MYSQL_USER=rockstar
+      - MYSQL_PASSWORD=rockstar123
+      - MYSQL_ROOT_PASSWORD=rockstar123
   artifactapi:
     image: rockstarproject/coreapi-artifact
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - AUTH0_ISSUER=https://rockstar.auth0.com/
-      - AUTH0_AUDIENCE=http://api.rock-star.io/v1
-      - SPRING_DATASOURCE_USERNAME=rockstar
-      - SPRING_DATASOURCE_PASSWORD=rockstar123
-      - 'SPRING_DATASOURCE_URL=jdbc:mysql://artifactmysql:3306/rockstar_db_artifact'
-    links:
+      - AUTH0_AUDIENCE=https://api.rock-star.io/
+    depends_on:
       - discovery
   gateway:
     image: rockstarproject/api-gateway
@@ -63,7 +83,11 @@ services:
       - 80:8765
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    links:
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.labels.type == gateway]
+    depends_on:
       - discovery
   discovery:
     image: rockstarproject/discovery-service
