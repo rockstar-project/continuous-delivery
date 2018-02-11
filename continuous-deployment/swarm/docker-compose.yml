@@ -8,21 +8,31 @@ services:
       - AUTH0_ISSUER=https://rockstar.auth0.com/
       - AUTH0_AUDIENCE=https://api.rock-star.io/
       - "SPRING_DATA_MONGODB_URI=mongodb://metadatamongo:27017/rockstar_db_metadata"
-    depends_on:
-      - discovery
-      - metadatamongo
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
   metadataseed:
     image: rockstarproject/datastore-metadata
-    depends_on:
-      - metadatamongo
     command:
       "mongoimport --host metadatamongo --db rockstar_db_metadata --collection metadata --type json --file metadata.json --jsonArray"
+    deploy:
+      placement:
+        constraints: [node.role == worker]
   metadatamongo:
     image: rockstarproject/datastore-metadata
     ports:
       - "27017:27017"
     volumes:
       - /data
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
   productapi:
     image: rockstarproject/coreapi-product
     environment:
@@ -32,9 +42,12 @@ services:
       - SPRING_DATASOURCE_USERNAME=rockstar
       - SPRING_DATASOURCE_PASSWORD=rockstar123
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://productmysql/rockstar_db_product'
-    depends_on:
-      - discovery
-      - productmysql
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
   productmysql:
     image: rockstarproject/datastore-product
     volumes:
@@ -46,6 +59,12 @@ services:
       - MYSQL_USER=rockstar
       - MYSQL_PASSWORD=rockstar123
       - MYSQL_ROOT_PASSWORD=rockstar123
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
   collectionapi:
     image: rockstarproject/coreapi-collection
     environment:
@@ -55,9 +74,12 @@ services:
       - SPRING_DATASOURCE_USERNAME=rockstar
       - SPRING_DATASOURCE_PASSWORD=rockstar123
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://collectionmysql/rockstar_db_collection'
-    depends_on:
-      - discovery
-      - collectionmysql
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
   collectionmysql:
     image: rockstarproject/datastore-collection
     volumes:
@@ -69,14 +91,24 @@ services:
       - MYSQL_USER=rockstar
       - MYSQL_PASSWORD=rockstar123
       - MYSQL_ROOT_PASSWORD=rockstar123
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
   artifactapi:
     image: rockstarproject/coreapi-artifact
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - AUTH0_ISSUER=https://rockstar.auth0.com/
       - AUTH0_AUDIENCE=https://api.rock-star.io/
-    depends_on:
-      - discovery
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == worker]
   gateway:
     image: rockstarproject/api-gateway
     ports:
@@ -85,11 +117,17 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     deploy:
       replicas: 1
+      restart_policy:
+        condition: on-failure
       placement:
-        constraints: [node.labels.type == gateway]
-    depends_on:
-      - discovery
+        constraints: [node.role == manager]
   discovery:
     image: rockstarproject/discovery-service
     ports:
       - 8761:8761
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints: [node.role == manager]

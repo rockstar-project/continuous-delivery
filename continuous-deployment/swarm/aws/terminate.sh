@@ -1,16 +1,20 @@
 #!/bin/bash
 
-# Show swarm cluster
-eval $(docker-machine env rockstarproject-master)
-echo "===== Swarm Cluster"
-docker node ls
+SWARM_WORKER_COUNT=4
+STACK_NAME=apistaging
+SECURITY_GROUP=${STACK_NAME}-swarmmanager-sg
+
+eval $(docker-machine env aws-${STACK_NAME}-swarm-manager)
 
 # Remove master nodes
-docker-machine stop rockstarproject-master
-docker-machine rm -f rockstarproject-master
+docker-machine rm -f aws-${STACK_NAME}-swarm-manager
 
 # Remove all worker nodes
-for i in $(seq "${SWARM_NUM_WORKER}"); do
-  docker-machine stop rockstarproject-worker-${i}
-  docker-machine rm -f rockstarproject-worker-${i}
+for i in $(seq "${SWARM_WORKER_COUNT}"); do
+  docker-machine rm -f aws-${STACK_NAME}-swarm-worker${i}
+  aws ec2 delete-key-pair --key-name aws-${STACK_NAME}-swarm-worker${i}
 done
+
+echo "terminating aws-${STACK_NAME}-swarm-manager node..."
+sleep 120
+aws ec2 delete-security-group --group-name ${SECURITY_GROUP}

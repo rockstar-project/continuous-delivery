@@ -1,7 +1,7 @@
 #!/bin/bash
 
 STACK_NAME=$1
-eval $(docker-machine env ${STACK_NAME}-swarm-manager)
+eval $(docker-machine env aws-${STACK_NAME}-swarm-manager)
 
 docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
 
