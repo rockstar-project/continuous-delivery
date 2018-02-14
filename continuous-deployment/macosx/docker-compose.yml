@@ -22,7 +22,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - /data
+      - metadata-data:/data/db
   productapi:
     image: rockstarproject/coreapi-product
     environment:
@@ -38,7 +38,7 @@ services:
   productmysql:
     image: rockstarproject/datastore-product
     volumes:
-      - /data
+      - product-data:/var/lib/mysql
     ports:
       - 3308:3306
     environment:
@@ -61,7 +61,7 @@ services:
   collectionmysql:
     image: rockstarproject/datastore-collection
     volumes:
-      - /data
+      - collection-data:/var/lib/mysql
     ports:
       - 3307:3306
     environment:
@@ -89,3 +89,8 @@ services:
     image: rockstarproject/discovery-service
     ports:
       - 8761:8761
+
+volumes:
+  metadata-data:
+  product-data:
+  collection-data:

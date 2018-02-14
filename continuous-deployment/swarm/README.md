@@ -1,28 +1,29 @@
 ## Deploy Swarm Cluster
 
-#### Virtual Box
+#### Virtual Box Local Environment
 
 ```
-./vb/setup.sh apistaging
-./deploy.sh apistaging
+source ./environment/common.sh
+source ./environment/local.sh
+./vb/setup.sh
+./deploy.sh
 ```
 
-#### AWS cloud
+#### AWS cloud Staging Environment
 
-##### Staging/Pre-Prod
+##### Provision Nodes, setup swarm cluster & deploy services
 
 ```
 ./aws/setup.sh apistaging
 ./deploy.sh apistaging
 ```
 
-## Terminate Swarm Cluster
+## Tear down Swarm Cluster
 
 #### Virtual Box
 
 ```
-./remove.sh apistaging
-./vb/terminate.sh apistaging
+./vb/teardown.sh
 ```
 
 #### AWS cloud
@@ -30,6 +31,5 @@
 ##### Staging/Pre-Prod
 
 ```
-./remove.sh apistaging
-./aws/terminate.sh apistaging
+./aws/terminate.sh
 ```

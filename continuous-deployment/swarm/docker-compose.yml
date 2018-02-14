@@ -26,7 +26,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - /data
+      - metadata-data:/data/db
     deploy:
       replicas: 1
       restart_policy:
@@ -51,7 +51,7 @@ services:
   productmysql:
     image: rockstarproject/datastore-product
     volumes:
-      - /data
+      - product-data:/var/lib/mysql
     ports:
       - 3308:3306
     environment:
@@ -83,7 +83,7 @@ services:
   collectionmysql:
     image: rockstarproject/datastore-collection
     volumes:
-      - /data
+      - collection-data:/var/lib/mysql
     ports:
       - 3307:3306
     environment:
@@ -131,3 +131,8 @@ services:
         condition: on-failure
       placement:
         constraints: [node.role == manager]
+
+volumes:
+  metadata-data:
+  product-data:
+  collection-data:

@@ -68,14 +68,13 @@ docker-compose logs --follow metadataapi
 
 ```
 docker-compose stop metadatamongo && docker-compose rm -f metadatamongo
+docker volume rm macosx_metadata-data
+docker-compose rm -f metadataseed
 docker rmi $DOCKER_NAMESPACE/datastore-metadata
 cd $APP_HOME/datastore-metadata/
 docker build -t $DOCKER_NAMESPACE/datastore-metadata .
 cd -
 docker-compose up -d metadatamongo
-docker-compose exec metadatamongo /bin/bash
-
-docker-compose stop metadataseed && docker-compose rm -f metadataseed
 docker-compose up -d metadataseed
 docker-compose logs --follow metadataseed
 ```

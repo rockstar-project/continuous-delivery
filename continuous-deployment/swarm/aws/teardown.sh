@@ -1,7 +1,6 @@
 #!/bin/bash
 
 SWARM_WORKER_COUNT=4
-STACK_NAME=apistaging
 SECURITY_GROUP=${STACK_NAME}-swarmmanager-sg
 
 eval $(docker-machine env aws-${STACK_NAME}-swarm-manager)
