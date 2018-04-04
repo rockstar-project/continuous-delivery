@@ -51,32 +51,17 @@ docker-compose up -d productmysql
 docker-compose logs --follow productmysql
 ```
 
-## redeploy coreapi-metadata
+## redeploy coreapi-microservice
 
 ```
-docker-compose stop metadataapi && docker-compose rm -f metadataapi
-docker rmi $DOCKER_NAMESPACE/coreapi-metadata
-cd $APP_HOME/coreapi-metadata/
+docker-compose stop microserviceapi && docker-compose rm -f microserviceapi
+docker rmi $DOCKER_NAMESPACE/coreapi-microservice
+cd $APP_HOME/coreapi-microservice/
 mvn clean package
-docker build -t $DOCKER_NAMESPACE/coreapi-metadata .
+docker build -t $DOCKER_NAMESPACE/coreapi-microservice .
 cd -
-docker-compose up -d metadataapi
-docker-compose logs --follow metadataapi
-```
-
-## redeploy datastore-metadata
-
-```
-docker-compose stop metadatamongo && docker-compose rm -f metadatamongo
-docker volume rm macosx_metadata-data
-docker-compose rm -f metadataseed
-docker rmi $DOCKER_NAMESPACE/datastore-metadata
-cd $APP_HOME/datastore-metadata/
-docker build -t $DOCKER_NAMESPACE/datastore-metadata .
-cd -
-docker-compose up -d metadatamongo
-docker-compose up -d metadataseed
-docker-compose logs --follow metadataseed
+docker-compose up -d microserviceapi
+docker-compose logs --follow microserviceapi
 ```
 
 ## redeploy coreapi-collection
@@ -116,3 +101,12 @@ cd -
 docker-compose up -d artifactapi
 docker-compose logs --follow artifactapi
 ```
+
+docker-compose stop cloudinary && docker-compose rm -f cloudinary
+docker rmi $DOCKER_NAMESPACE/consumer-integration-cloudinary
+cd $APP_HOME/consumer-integration-cloudinary/
+mvn clean package -Dmaven.test.skip=true
+docker build -t $DOCKER_NAMESPACE/consumer-integration-cloudinary .
+cd -
+docker-compose up -d cloudinary
+docker-compose logs --follow cloudinary

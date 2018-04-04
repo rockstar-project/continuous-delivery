@@ -1,30 +1,26 @@
 version: '3'
 
 services:
-  metadataapi:
-    image: rockstarproject/coreapi-metadata
+  microserviceapi:
+    image: rockstarproject/coreapi-microservice
+    ports:
+      - "8082:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - AUTH0_ISSUER=https://rockstar.auth0.com/
-      - AUTH0_AUDIENCE=https://api.rock-star.io/
-      - "SPRING_DATA_MONGODB_URI=mongodb://metadatamongo:27017/rockstar_db_metadata"
+      - "SPRING_DATA_MONGODB_URI=mongodb://microservicemongo:27017/rockstar_db_microservice"
     depends_on:
       - discovery
-      - metadatamongo
-  metadataseed:
-    image: rockstarproject/datastore-metadata
-    depends_on:
-      - metadatamongo
-    command:
-      "mongoimport --host metadatamongo --db rockstar_db_metadata --collection metadata --type json --file metadata.json --jsonArray"
-  metadatamongo:
-    image: rockstarproject/datastore-metadata
+      - microservicemongo
+  microservicemongo:
+    image: mongo
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
-      - metadata-data:/data/db
+      - microservice-data:/data/db
   productapi:
     image: rockstarproject/coreapi-product
+    ports:
+      - "8083:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - AUTH0_ISSUER=https://rockstar.auth0.com/
@@ -48,6 +44,8 @@ services:
       - MYSQL_ROOT_PASSWORD=rockstar123
   collectionapi:
     image: rockstarproject/coreapi-collection
+    ports:
+      - 8081:8080
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - AUTH0_ISSUER=https://rockstar.auth0.com/
@@ -55,6 +53,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=rockstar
       - SPRING_DATASOURCE_PASSWORD=rockstar123
       - 'SPRING_DATASOURCE_URL=jdbc:mysql://collectionmysql/rockstar_db_collection'
+      - MANAGEMENT_SECURITY_ENABLED=false
     depends_on:
       - discovery
       - collectionmysql
@@ -89,8 +88,44 @@ services:
     image: rockstarproject/discovery-service
     ports:
       - 8761:8761
+  cloudinary:
+    image: rockstarproject/consumer-integration-cloudinary
+    depends_on:
+      - messagebroker
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_DESTINATION=rockstar.outbound
+      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_BINDER=local_rabbit
+      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT_DESTINATION=rockstar.inbound
+      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT_BINDER=local_rabbit
+      - SPRING_CLOUD_STREAM_LOCAL_RABBIT.TYPE=rabbit
+      - SPRING_CLOUD_STREAM_LOCAL_RABBIT.environment.SPRING_RABBITMQ_HOST=messagebroker
+      - API_CLOUDINARY_NAME=dzmrr9uj9
+      - API_CLOUDINARY_APIKEY=896853214369343
+      - API_CLOUDINARY_SECRET=P71N0Asdgss8FDje_10bALaVlQI
+  messagebroker:
+    image: rabbitmq:3.5.3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - /var/lib/grafana
+    depends_on:
+      - prometheus
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
 
 volumes:
-  metadata-data:
   product-data:
   collection-data:
+  microservice-data:
