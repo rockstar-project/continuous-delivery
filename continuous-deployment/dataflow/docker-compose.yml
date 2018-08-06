@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15673:15672"
+      - "5673:5672"
+    expose:
+      - "15673"
+      - "5673"
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: scdf
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: dataflow
+    ports:
+      - "3306:3306"
+    expose:
+      - 3306
+  redis:
+    image: redis:2.8
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
